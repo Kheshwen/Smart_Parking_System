@@ -1,10 +1,9 @@
 # Smart Parking System
-C++ Project assignment for UTP course **Structured Programming (TEB1013)**
+A command-line based Smart Parking System developed in C++ to manage parking slots efficiently for students and staff.
 _ _ _
 
 # Project Description
-This is a console-based Smart Parking System developed using C++ as part of the **TEB1013 Structured Programming** course at Universiti Teknologi PETRONAS (UTP).  
-The system is designed to manage parking slots efficiently for students and staff, featuring ID-based access, real-time slot updates and a stylized text UI for showcasing the parking availability.
+This is a console-based Smart Parking System developed using C++ as part of the **TEB1013 Structured Programming** course at Universiti Teknologi PETRONAS (UTP). The system is designed to manage parking slots efficiently for students and staff, featuring ID-based access, real-time slot updates and a stylized text UI for showcasing the parking availability.
 _ _ _
 
 # Features
