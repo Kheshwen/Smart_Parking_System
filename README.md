@@ -21,7 +21,6 @@ _ _ _
 - `functions` – modular structure with reusable logic  
 - `vector` – dynamic storage of users  
 - `text formatting` – for clear UI presentation  
-- `file handling (optional)` – for logs and future enhancement
 _ _ _
 
 # How it looks
