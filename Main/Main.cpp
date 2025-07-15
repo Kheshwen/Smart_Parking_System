@@ -88,7 +88,7 @@ void enterParking(const string& id) { //Function to enter parking
 
                 User newUser = { id, true, i, j };
                 if (index == -1) {
-                    users.push_back(newUser); // 🆕 Add new user to vector
+                    users.push_back(newUser); // Add new user to vector
                 }
                 else {
                     users[index] = newUser;
@@ -130,7 +130,7 @@ int main() { // Main function to run the parking system
         cout << "4 Exit Program\n";
         cout << "Enter no.of choice from above: ";
 
-        if (!(cin >> choice)) { // ✅ Input validation for non-integer
+        if (!(cin >> choice)) { // Input validation for non-integer
             cin.clear();
             cin.ignore(10000, '\n');
             cout << "Invalid input. Please enter a number.\n";
@@ -149,7 +149,7 @@ int main() { // Main function to run the parking system
             exitParking(id);
             break;
         case 3:
-            displayStylizedGrid(); // 🆕 Replaces basic display with stylized version
+            displayStylizedGrid(); // 
             break;
         case 4:
             cout << "Exiting system.\n";
