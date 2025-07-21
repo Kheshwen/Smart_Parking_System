@@ -1,139 +1,144 @@
-﻿#include <iostream>
-#include <string>
-#include <vector> // Dynamic user management with vector
+﻿#include <iostream>  
+#include <iomanip>  
+#include <unordered_map>  
+#include <string>  
 using namespace std;
 
-const int ROWS = 4; // 4 rows of parking
-const int COLS = 4; // 4 columns of parking
+const int ROWS = 5, COLS = 5;
 
-// total parking slot is 16
-
-struct User {       //Function to store user's details 
+struct User {
     string id;
-	bool isParked = false; //Track if user is parked
-    int slotRow = -1; //Row checking
-	int slotCol = -1; //Column checking
+    bool isParked;
+    int slotRow, slotCol;
 };
 
-struct ParkingSlot { //Function to store parking slot details
+struct ParkingSlot {
     bool isOccupied = false;
-    string username = "";
+    string username;
 };
 
-ParkingSlot parkingLot[ROWS][COLS]; // 2D array for parking slots
-vector<User> users; 
+ParkingSlot parkingLot[ROWS][COLS];
+unordered_map<string, User> userMap;
 
-
-
-
-void displayStylizedGrid() {    //Func to display parking grid
+void displayStylizedGrid() {
     cout << "\n+=============================================+\n";
     cout << "|           SMART PARKING SYSTEM              |\n";
     cout << "+=============================================+\n\n";
 
-    int spot = 1;
     for (int row = 0; row < ROWS; ++row) {
-        cout << "       +------+------+------+------+------+\n";
-        cout << "       | ";
-        for (int col = 0; col < COLS; ++col) {
-            cout << "P" << spot++ << "  | ";
-        }
+        cout << "      ";
+        for (int col = 0; col < COLS; ++col) cout << "+------";
+        cout << "+\n       | ";
+
+        for (int col = 0; col < COLS; ++col)
+            cout << "P" << setw(2) << row * COLS + col + 1 << "  | ";
         cout << "\n       | ";
-        spot -= COLS;
-        for (int col = 0; col < COLS; ++col) {
-            int i = row;
-            int j = col;
-            cout << (parkingLot[i][j].isOccupied ? "X" : "O") << "   | ";
-            ++spot;
-        }
+
+        for (int col = 0; col < COLS; ++col)
+            cout << "  " << (parkingLot[row][col].isOccupied ? "X" : "O") << "  | ";
         cout << "\n";
     }
-    cout << "       +------+------+------+------+------+\n";
-    cout << "\nLegend: O = Available | X = Occupied\n";
+
+    cout << "       ";
+    for (int col = 0; col < COLS; ++col) cout << "+------";
+    cout << "+\n\nLegend: O = Available | X = Occupied\n";
     cout << "===============================================\n";
 }
 
-bool checkAvailability() { //Function to check if parking slots are available
+bool isParkingAvailable() {
     for (int i = 0; i < ROWS; ++i)
         for (int j = 0; j < COLS; ++j)
-            if (!parkingLot[i][j].isOccupied)
-                return true;
+            if (!parkingLot[i][j].isOccupied) return true;
     return false;
 }
 
-int findUserIndex(const string& id) { //Function to find user index in vector
-    for (int i = 0; i < users.size(); ++i)
-        if (users[i].id == id)
-            return i;
-    return -1;
+pair<int, int> getSlotCoordinates(int choice) {
+    return make_pair((choice - 1) / COLS, (choice - 1) % COLS);
 }
 
-void enterParking(const string& id) { //Function to enter parking
-    int index = findUserIndex(id);
-    if (index != -1 && users[index].isParked) {
+void enterParking(const string& id) {
+    if (userMap.count(id) && userMap[id].isParked) {
         cout << "Error: You are already parked.\n";
         return;
     }
 
-	if (!checkAvailability()) { // Check if parking is available
+    if (!isParkingAvailable()) {
         cout << "Sorry, parking is full.\n";
         return;
     }
 
-	for (int i = 0; i < ROWS; ++i) { // Loop through parking slots
-        for (int j = 0; j < COLS; ++j) {
-            if (!parkingLot[i][j].isOccupied) {
-                parkingLot[i][j].isOccupied = true;
-                parkingLot[i][j].username = id;
-
-                User newUser = { id, true, i, j };
-                if (index == -1) {
-                    users.push_back(newUser); // Add new user to vector
-                }
-                else {
-                    users[index] = newUser;
-                }
-
-                cout << "Welcome, " << id << "! Your slot is: (" << i << ", " << j << ")\n";
-                return;
-            }
-        }
+    cout << "\nAvailable slots: ";
+    for (int i = 0; i < ROWS * COLS; ++i) {
+        pair<int, int> coordinates = getSlotCoordinates(i + 1);
+        int r = coordinates.first;
+        int c = coordinates.second;
+        if (!parkingLot[r][c].isOccupied)
+            cout << "P" << i + 1 << " ";
     }
+
+    int choice;
+    cout << "\nPick a slot number (1-" << ROWS * COLS << "): ";
+    cin >> choice;
+
+    if (choice < 1 || choice > ROWS * COLS) {
+        cout << "Invalid slot number.\n";
+        return;
+    }
+
+    pair<int, int> coordinates = getSlotCoordinates(choice);
+    int row = coordinates.first;
+    int col = coordinates.second;
+    if (parkingLot[row][col].isOccupied) {
+        cout << "Error: Slot P" << choice << " is already taken.\n";
+        return;
+    }
+
+    parkingLot[row][col].isOccupied = true;
+    parkingLot[row][col].username = id;
+    userMap[id] = User{ id, true, row, col };
+
+    cout << "Welcome, " << id << "! Your slot is: P" << choice << "\n";
 }
 
-void exitParking(const string& id) { //Function to exit parking
-    int index = findUserIndex(id);
-    if (index == -1 || !users[index].isParked) {
+void exitParking(const string& id) {
+    if (!userMap.count(id) || !userMap[id].isParked) {
         cout << "Error: You are not currently parked.\n";
         return;
     }
 
-    int i = users[index].slotRow;
-    int j = users[index].slotCol;
+    int r = userMap[id].slotRow, c = userMap[id].slotCol;
+    parkingLot[r][c].isOccupied = false;
+    parkingLot[r][c].username.clear();
+    userMap[id].isParked = false;
 
-    parkingLot[i][j].isOccupied = false;
-    parkingLot[i][j].username = "";
-    users[index].isParked = false;
-
-    cout << "Goodbye, " << id << "! You have exited from slot (" << i << ", " << j << ").\n";
+    cout << "Goodbye, " << id << "! You exited slot P" << r * COLS + c + 1 << ".\n";
 }
 
-int main() { // Main function to run the parking system
+void clearScreen() {
+#ifdef _WIN32  
+    system("cls");
+#else  
+    system("clear");
+#endif  
+}
+
+int main() {
     int choice;
     string id;
 
     do {
+        displayStylizedGrid();
         cout << "\n--- Smart Parking System ---\n";
         cout << "1 Enter Parking\n";
         cout << "2 Exit Parking\n";
-        cout << "3 View Parking Grid\n";
+        cout << "3 Upcoming\n";
         cout << "4 Exit Program\n";
-        cout << "Enter no.of choice from above: ";
+        cout << "Enter choice: ";
 
-        if (!(cin >> choice)) { // Input validation for non-integer
+        if (!(cin >> choice)) {
             cin.clear();
             cin.ignore(10000, '\n');
-            cout << "Invalid input. Please enter a number.\n";
+            cout << "Invalid input. Enter a number.\n";
             continue;
         }
 
@@ -149,7 +154,6 @@ int main() { // Main function to run the parking system
             exitParking(id);
             break;
         case 3:
-            displayStylizedGrid(); // 
             break;
         case 4:
             cout << "Exiting system.\n";
@@ -157,6 +161,7 @@ int main() { // Main function to run the parking system
         default:
             cout << "Invalid choice. Try again.\n";
         }
+        clearScreen();
     } while (choice != 4);
 
     return 0;
