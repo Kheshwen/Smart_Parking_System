@@ -58,12 +58,12 @@ pair<int, int> getSlotCoordinates(int choice) {
 
 void enterParking(const string& id) {
     if (userMap.count(id) && userMap[id].isParked) {
-        cout << "Error: You are already parked.\n";
+        cout << "Error: You are already parked." << endl;
         return;
     }
 
     if (!isParkingAvailable()) {
-        cout << "Sorry, parking is full.\n";
+        cout << "Sorry, parking is full." << endl;
         return;
     }
 
@@ -81,7 +81,7 @@ void enterParking(const string& id) {
     cin >> choice;
 
     if (choice < 1 || choice > ROWS * COLS) {
-        cout << "Invalid slot number.\n";
+        cout << "Invalid slot number." << endl;
         return;
     }
 
@@ -89,7 +89,7 @@ void enterParking(const string& id) {
     int row = coordinates.first;
     int col = coordinates.second;
     if (parkingLot[row][col].isOccupied) {
-        cout << "Error: Slot P" << choice << " is already taken.\n";
+        cout << "Error: Slot P" << choice << " is already taken." << endl;
         return;
     }
 
@@ -143,19 +143,19 @@ int main() {
 
         switch (choice) {
         case 1:
-			cout << endl;
+			cout << "\n";
             cout << "Enter ID: ";
             cin >> id;
             enterParking(id);
             break;
         case 2:
-            cout << endl;
+            cout << "\n";
             cout << "Enter ID: ";
             cin >> id;
             exitParking(id);
             break;
         case 3:
-			cout << endl;
+			cout << "\n";
             cout << "Exiting system.";
             return 0;
             break;
