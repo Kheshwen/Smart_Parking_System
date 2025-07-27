@@ -52,7 +52,7 @@ bool isParkingAvailable() {
     return false;
 }
 
-pair<int, int> getSlotCoordinates(int choice) {
+pair <int, int> getSlotCoordinates(int choice) {
     return make_pair((choice - 1) / COLS, (choice - 1) % COLS);
 }
 
@@ -115,11 +115,7 @@ void exitParking(const string& id) {
 }
 
 void clearScreen() {
-#ifdef _WIN32  
-    system("cls");
-#else  
-    system("clear");
-#endif  
+system("cls");
 }
 
 int main() {
@@ -140,7 +136,6 @@ int main() {
             cout << "Invalid input. Enter a number.\n";
             continue;
         }
-
         switch (choice) {
         case 1:
 			cout << "\n";
@@ -159,6 +154,7 @@ int main() {
             cout << "Exiting system.";
             return 0;
             break;
+
         default:
             cout << "Invalid choice. Try again.\n";
         }
