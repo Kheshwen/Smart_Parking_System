@@ -131,8 +131,7 @@ int main() {
         cout << "\n--- Smart Parking System ---\n";
         cout << "1 Enter Parking\n";
         cout << "2 Exit Parking\n";
-        cout << "3 Upcoming\n";
-        cout << "4 Exit Program\n";
+        cout << "3 Exit Program\n";
         cout << "Enter choice: ";
 
         if (!(cin >> choice)) {
@@ -144,19 +143,21 @@ int main() {
 
         switch (choice) {
         case 1:
+			cout << endl;
             cout << "Enter ID: ";
             cin >> id;
             enterParking(id);
             break;
         case 2:
+            cout << endl;
             cout << "Enter ID: ";
             cin >> id;
             exitParking(id);
             break;
         case 3:
-            break;
-        case 4:
-            cout << "Exiting system.\n";
+			cout << endl;
+            cout << "Exiting system.";
+            return 0;
             break;
         default:
             cout << "Invalid choice. Try again.\n";
