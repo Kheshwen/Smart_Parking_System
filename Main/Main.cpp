@@ -1,7 +1,9 @@
 ﻿#include <iostream>  
+#include <sstream>
 #include <iomanip>  
 #include <unordered_map> 
 #include <string>  
+#include <ctime>
 using namespace std;
 
 const int ROWS = 5, COLS = 5;
@@ -10,6 +12,7 @@ struct User {
     string id;
     bool isParked;
     int slotRow, slotCol;
+	time_t entryTime;  
 };
 
 struct ParkingSlot {
@@ -29,32 +32,21 @@ void displayStylizedGrid() {
     for (int row = 0; row < ROWS; ++row) {
         cout << "      ";
         for (int col = 0; col < COLS; ++col) cout << "+------";
-        cout << "+\n       | ";
+        cout << "+\n      | ";
 
         for (int col = 0; col < COLS; ++col)
             cout << "P" << setw(2) << row * COLS + col + 1 << "  | ";
-        cout << "\n       | ";
+        cout << "\n      | ";
 
 		for (int col = 0; col < COLS; ++col)  // get the status of each slot
             cout << "  " << (parkingLot[row][col].isOccupied ? "X" : "O") << "  | ";  
         cout << "\n";
     }
 
-    cout << "       ";
+    cout << "      ";
     for (int col = 0; col < COLS; ++col) cout << "+------";
     cout << "+\n\nLegend: O = Available | X = Occupied\n";
     cout << "===============================================\n";
-
-    cout << "\n--- Parking History ---\n";
-    for (const auto& entry : userMap) {
-        const User& user = entry.second;
-        if (user.isParked) {
-            cout << "User ID: " << user.id << ", Slot: P" << user.slotRow * COLS + user.slotCol + 1 << "\n";
-        }
-        else {
-        }
-    }
-    cout << "------------------------\n";
 }
 
 bool isParkingAvailable() {
@@ -107,7 +99,7 @@ void enterParking(const string & id) {
 
     parkingLot[row][col].isOccupied = true;
     parkingLot[row][col].username = id;
-    userMap[id] = User{ id, true, row, col };  // user
+	userMap[id] = User{ id, true, row, col, time(0) };  
 
     cout << "Welcome, " << id << "! Your slot is: P" << choice << "\n";
 }
@@ -126,6 +118,84 @@ void exitParking(const string& id) {
     cout << "Goodbye, " << id << "! You exited slot P" << r * COLS + c + 1 << ".\n";
 }
 
+void viewParkedUsers() {
+
+    cout << "\n+=======================================================================+\n";
+    cout << "|                     CURRENTLY PARKED USERS                            |\n";
+    cout << "+=======================================================================+\n";
+    cout << left << setw(15) << "User ID" << setw(10) << "Slot" << setw(30) << "Parked Time" << "Duration\n";
+    cout << "+-----------------------------------------------------------------------+\n";
+
+    bool any = false;
+    for (const auto& entry : userMap) {
+        const User& user = entry.second;
+        if (user.isParked) {
+            int slotNum = user.slotRow * COLS + user.slotCol + 1;
+
+            // Format parked time
+            char timeStr[26];
+            ctime_s(timeStr, sizeof(timeStr), &user.entryTime);
+            timeStr[strlen(timeStr) - 1] = '\0';  // remove newline
+
+            // Calculate duration
+            time_t now = time(0);
+            int durationSeconds = static_cast<int>(difftime(now, user.entryTime));
+            int hours = durationSeconds / 3600;
+            int minutes = (durationSeconds % 3600) / 60;
+
+            // Format duration nicely
+            ostringstream durationStr;
+            durationStr << hours << "h " << minutes << "m";
+
+            // Print formatted row
+            cout << left << setw(15) << user.id << setw(10) << ("P" + to_string(slotNum)) << setw(30) << timeStr << durationStr.str() << "\n";
+
+            any = true;
+        }
+    }
+
+    if (!any)
+        cout << "No users are currently parked.\n";
+
+    cout << "+=======================================================================+\n";
+}
+
+void searchUserSlot(const string& id) {
+    if (!userMap.count(id)) {
+        cout << "User ID not found in records.\n";
+        return;
+    }
+
+    const User& user = userMap[id];
+    if (user.isParked) {
+        cout << "User " << id << " is parked at slot P" << user.slotRow * COLS + user.slotCol + 1 << ".\n";
+    }
+    else {
+        cout << "User " << id << " is registered but not currently parked.\n";
+    }
+}
+
+void displaySummary() {
+    int occupied = 0, available = 0;
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            if (parkingLot[i][j].isOccupied) occupied++;
+            else available++;
+        }
+    }
+    cout << "\n--- Parking Slot Summary ---\n";
+    cout << "Total Slots: " << ROWS * COLS << "\n";
+    cout << "Occupied   : " << occupied << "\n";
+    cout << "Available  : " << available << "\n";
+    cout << "------------------------------\n";
+}
+
+void waitUserInput() {
+	cout << "\nPress Enter to continue...";
+	cin.ignore();
+	cin.get();  
+}
+
 void clearScreen() {
 system("cls"); 
 }
@@ -140,8 +210,11 @@ int main() {
         cout << "\n--- Smart Parking System ---\n";
         cout << "1 Enter Parking\n";
         cout << "2 Exit Parking\n";
-        cout << "3 Exit Program\n";
-        cout << "Enter choice: ";
+		cout << "3 View Parked Users\n";
+        cout << "4 Search User Parking Info\n";
+        cout << "5 View Slot Summary\n";
+        cout << "99 Exit Program\n";
+        cout << "\nEnter choice: ";
 
         if (!(cin >> choice)) {
             cin.clear();
@@ -156,23 +229,48 @@ int main() {
             cin >> id;
             enterParking(id);
             break;
+
         case 2:
             cout << "\n";
             cout << "Enter ID: ";
             cin >> id;
             exitParking(id);
+            break;
 
-            break;
         case 3:
-			cout << "\n";
-            cout << "Exiting system.";
-            return 0;
+            clearScreen();
+			displayStylizedGrid();
+			viewParkedUsers();
+			waitUserInput();
             break;
+
+        case 4:
+            clearScreen();
+            displayStylizedGrid();
+            cout << "\nEnter ID to search: ";
+            cin >> id;
+            searchUserSlot(id);
+            waitUserInput();
+            break;
+
+        case 5:
+            clearScreen();
+			displayStylizedGrid();
+			displaySummary();
+			waitUserInput();
+            break;
+
+		case 99:
+            clearScreen();
+            cout << "\n";
+            cout << "Exiting program.....\n";
+            cout << "\n";
+            return 0;
 
         default:
             cout << "Invalid choice. Try again.\n";
         }
         clearScreen();
-    } while (choice != 3 );
+    } while (choice != 99 );
 
 }
